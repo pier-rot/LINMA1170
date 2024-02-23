@@ -1,7 +1,5 @@
 import numpy as np
 import numba
-import time
-import matplotlib.pyplot as plt
 
 # ======== Function Definitions ========
 
@@ -35,17 +33,6 @@ def make_T(m,n,t):
 	T[n:] = 1
 
 	return T
-
-
-
-def b(t,T,i,p):
-	# Coefficient de B-spline d'ordre p, au paramètre t et de noeuds T
-	if p == 0:
-		return (T[i] <= t)*(t < T[i+1])
-	else:
-		u  = 0.0 if T[i+p ]  == T[i]   else (t-T[i])/(T[i+p]- T[i]) * b(t,T,i,p-1)
-		u += 0.0 if T[i+p+1] == T[i+1] else (T[i+p+1]-t)/(T[i+p+1]-T[i+1]) * b(t,T,i+1,p-1)
-		return u
 
 @numba.jit(nopython=True, parallel=False)
 def qr(A):
@@ -88,51 +75,3 @@ def lstsq(A,B):
 	for i in range(p):
 		X[:,i] = backward_substitution(R,V[:,i])
 	return X
-
-
-# Étude de la complexité de la décomposition QR
-
-# Caching de qr et lstsq
-dummyA = np.random.rand(2,2)
-dummyB = np.random.rand(2,2)
-lstsq(dummyA,dummyB)
-
-
-def computeTime(m, n):
-	# Fonction de calcul des temps en fonction de m et n
-	deltaT = np.zeros(m.shape)
-	for i in range(m.shape[0]):
-		for j in range(m.shape[1]):
-			A = np.random.rand(i+1,j+1)
-			t1 = time.time()
-			C = qr(A)
-			t2 = time.time()
-			deltaT[i,j] = t2 - t1
-
-	return deltaT
-
-# Definition des m et n à évaluer
-m_values = np.arange(10, 2000, 40)
-n_values = np.arange(10, 2000, 40)
-
-# Meshgrid de m_values et n_values
-m, n = np.meshgrid(m_values, n_values)
-
-# Calcul du mesh des temps de calcul
-z = computeTime(m,n)
-
-# Plot 3D
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-
-# Plot la surface
-ax.plot_surface(m, n, z, cmap='viridis')
-
-# Label et titre
-ax.set_xlabel('m')
-ax.set_ylabel('n')
-ax.set_zlabel('Temps de la factorisation QR')
-ax.set_title("Graphe de la complexité d'une factorisation QR en fonction de m et n < 1000")
-
-# Show the plot
-plt.show()
