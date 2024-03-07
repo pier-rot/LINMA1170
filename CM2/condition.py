@@ -12,7 +12,7 @@ kappa = np.linalg.cond(A)
 # print(f'{np.linalg.cond(A) = }')
 
 p = 1000
-delta = np.zeros((p,2))
+delta = np.zeros((p,m))
 for k in range(p):
 	Ap = A + 1e-10 * np.random.randn(m,m)
 	xp = np.linalg.solve(Ap, b)
@@ -22,7 +22,7 @@ fig,ax = plt.subplots()
 ax.scatter(delta[:,0], delta[:,1])
 circle = plt.Circle((0.0,0.0), kappa, fill=False)
 ax.add_patch(circle)
-
+print(delta)
 print(f'{kappa = }')
 print(f'{np.max(np.linalg.norm(delta, axis=1)) = }')
 
