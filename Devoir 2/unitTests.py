@@ -1,26 +1,29 @@
 import numpy as np
 import matplotlib.pyplot as plt
+# import scipy as sp
+import numba
 
-A = np.random.randn(5,3)
+@numba.jit(nopython=True, parallel=False)
+def cholesky_crout(A):
+    C = A
+    m,n = A.shape
 
-# L = np.tril(A)
-# U = np.triu(A)
-# 
-# ltl = L.T @ L
-# utu = U.T @ U
-# ll = L @ L
-# uu = U @ U
-# 
-# fig, axs = plt.subplots(2,2)
-# axs[0][0].imshow(ltl, cmap="Blues", label="ltl")
-# axs[0][0].set_title("L.T @ L")
-# axs[0][1].imshow(utu, cmap="Blues", label="utu")
-# axs[0][1].set_title("U.T @ U")
-# axs[1][0].imshow(ll, cmap="Blues", label="ll")
-# axs[1][0].set_title("L @ L")
-# axs[1][1].imshow(uu, cmap="Blues", label="uu")
-# axs[1][1].set_title("U @ U")
+    for k in range(n):
+        for j in range(k+1, n):
+            for i in range(j,n):
+                C[i,j] = C[i,j] - C[i,k]*C[j,k]/C[k,k]
+        
+        for i in range(k,n):
+            C[i,k] = C[i,k]/np.sqrt(C[k,k])
+    return C
 
-
-plt.imshow(A.T @ A, cmap="Blues")
-plt.show()
+n=10
+m= 15
+Cd = cholesky_crout(np.random.randn(2,2))
+x = np.random.randn(n)
+A = np.random.randn(m,n)
+A = A.T @ A
+L = cholesky_crout(A)
+lnp = np.linalg.cholesky(A)
+print(A @ x)
+print(lnp @ lnp.T @ x)
