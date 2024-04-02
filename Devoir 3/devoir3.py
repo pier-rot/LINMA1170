@@ -1,4 +1,7 @@
-
+import numba
+import numpy as np
+import matplotlib.pyplot as plt
+from time import perf_counter_ns, process_time_ns
 
 # Transformation sous forme Hessenberg
 def hessenberg(A,P):
