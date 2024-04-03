@@ -5,7 +5,7 @@ from time import perf_counter_ns, process_time_ns
 
 ## Helper functions
 #
-7
+
 
 ## Main Functions
 # Transformation sous forme Hessenberg
@@ -18,7 +18,6 @@ def hessenberg(A,P):
         A (np.ndarray (with np.complex_ entries)): Contains n x n matrix A
         P (np.ndarray (with np.complex_ entries)): Un-initialised array which contains n x n unitary transformation matrix P
     """
-    return 0
 
 # Transformation QR
 @numba.jit(nopython=True, parallel=False, cache=True)
@@ -30,8 +29,11 @@ def step_QR(H,U,m):
         H (np.ndarray (with np.complex_ entries)): A complex n x n matrix in Hessenberg form
         U (np.ndarray (with np.complex_ entries)): A complex n x n matrix which contains U such that H = U* A U
         m (int): The dimension of the active matrix
+    Returns:
+        m_new (int) : New dimension of active matrix after an eigenvalue is found
     """
-    return 0
+
+    return m_new
 
 # Transformation QR with shifts
 @numba.jit(nopython=True, parallel=False, cache=True)
