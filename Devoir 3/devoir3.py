@@ -10,7 +10,7 @@ from time import perf_counter_ns, process_time_ns
 ## Main Functions
 # Transformation sous forme Hessenberg
 @numba.jit(nopython=True, parallel=False, cache=True)
-def hessenberg(A,P):
+def hessenberg(A : np.ndarray , P : np.ndarray):
     """Transformation of A in upper Hessenberg form.
     This is done in-place to reduce memory usage.
 
@@ -21,7 +21,7 @@ def hessenberg(A,P):
 
 # Transformation QR
 @numba.jit(nopython=True, parallel=False, cache=True)
-def step_QR(H,U,m):
+def step_QR(H : np.ndarray ,U : np.ndarray ,m : int) -> int:
     """A unitary transformation Q is applied on the left and the right of H which transforms H into RQ for which QR is the QR-factorization of H.
     This is done in-place to reduce memory usage.
 
@@ -32,12 +32,12 @@ def step_QR(H,U,m):
     Returns:
         m_new (int) : New dimension of active matrix after an eigenvalue is found
     """
-
+    m_new = 0
     return m_new
 
 # Transformation QR with shifts
 @numba.jit(nopython=True, parallel=False, cache=True)
-def step_qr_shift(H, U, m):
+def step_qr_shift(H : np.ndarray, U : np.ndarray , m : int):
     """Introducing the Wilksinson shift σ, we compute the QR factorization of H - σI instead of H.
     This is done in-place to reduce memory usage.
 
@@ -49,7 +49,7 @@ def step_qr_shift(H, U, m):
 
 # Algorithme QR
 @numba.jit(nopython=True, parallel=False, cache=True)
-def solve_qr(A, use_shifts,eps,max_iter):
+def solve_qr(A : np.ndarray, use_shifts : bool , eps : float , max_iter : int) -> tuple[np.ndarray, int]:
     """Computes the QR factorization such that A = U* T U.
     This is done in-place to reduce memory usage.
 
@@ -63,5 +63,7 @@ def solve_qr(A, use_shifts,eps,max_iter):
         U (np.ndarray (with np.complex_ entries)) : Contains the unitary transformation U such that A = U* T U
         k (int) : Number of iterations necessary or -1 if max_iter is exceeded
     """
+    U = A
+    k = 0
 
     return U,k
