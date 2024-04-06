@@ -1,7 +1,5 @@
 from numba import njit, prange
 import numpy as np
-import matplotlib.pyplot as plt
-from time import perf_counter_ns, process_time_ns
 
 ## Helper functions
 # Vector dot product
