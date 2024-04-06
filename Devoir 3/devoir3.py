@@ -11,12 +11,28 @@ def dot(v1 : np.ndarray, v2 : np.ndarray):
     if v1.shape[0] != v2.shape[0] :
         raise ValueError
     
-    for i in range(v1.shape[0]):
+    for i in prange(v1.shape[0]):
         sum += v1[i]*v2[i]
     
     return sum
     
+@njit(parallel=True, cache=True)
+def mprod(m1 : np.ndarray, m2 : np.ndarray) -> np.ndarray:
+    if m1.shape[1] != m2.shape[0]:
+        raise ValueError(f"m1 has {m1.shape[1]} columns while m2 has {m2.shape[0]} rows")
+    
+    m,n = m1.shape
+    _,p = m2.shape
+    m3 = np.zeros((m,p))
 
+    for i in prange(m):
+        for j in prange(p):
+            for k in prange(n):
+                m3[i,j] += m1[i,k] * m1[k,j]
+
+    return m3
+
+    
 
 ## Main Functions
 # Transformation sous forme Hessenberg
