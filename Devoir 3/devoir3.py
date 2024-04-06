@@ -4,31 +4,44 @@ import matplotlib.pyplot as plt
 from time import perf_counter_ns, process_time_ns
 
 ## Helper functions
-#
+# Vector dot product
 @njit(parallel=True, cache=True)
 def dot(v1 : np.ndarray, v2 : np.ndarray):
-    sum = 0
     if v1.shape[0] != v2.shape[0] :
-        raise ValueError
+        raise ValueError(f"Invalid shape : {v1.shape[0]} != {v2.shape[0]}")
     
+    v1 = v1.astype(np.complex64)
+    v2 = v2.astype(np.complex64)
+    
+    sum = 0
     for i in prange(v1.shape[0]):
         sum += v1[i]*v2[i]
     
     return sum
-    
+
+# Matrix product   
 @njit(parallel=True, cache=True)
 def mprod(m1 : np.ndarray, m2 : np.ndarray) -> np.ndarray:
     if m1.shape[1] != m2.shape[0]:
         raise ValueError(f"m1 has {m1.shape[1]} columns while m2 has {m2.shape[0]} rows")
-    
+
+    m1 = m1.astype(np.complex64)
+    m2 = m2.astype(np.complex64)
+
+    if m1.ndim == 1:
+        m1 = np.reshape((1,m1.size))
+    if m2.ndim == 1:
+        m2 = np.reshape((1,m2.size))
+
     m,n = m1.shape
     _,p = m2.shape
-    m3 = np.zeros((m,p))
+
+    m3 = np.zeros((m,p),dtype=np.complex64)
 
     for i in prange(m):
         for j in prange(p):
             for k in prange(n):
-                m3[i,j] += m1[i,k] * m1[k,j]
+                m3[i,j] += m1[i,k] * m2[k,j]
 
     return m3
 
