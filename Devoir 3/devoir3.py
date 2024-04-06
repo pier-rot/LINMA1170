@@ -1,15 +1,26 @@
-import numba
+from numba import njit, prange
 import numpy as np
 import matplotlib.pyplot as plt
 from time import perf_counter_ns, process_time_ns
 
 ## Helper functions
 #
+@njit(parallel=True, cache=True)
+def dot(v1 : np.ndarray, v2 : np.ndarray):
+    sum = 0
+    if v1.shape[0] != v2.shape[0] :
+        raise ValueError
+    
+    for i in range(v1.shape[0]):
+        sum += v1[i]*v2[i]
+    
+    return sum
+    
 
 
 ## Main Functions
 # Transformation sous forme Hessenberg
-@numba.jit(nopython=True, parallel=False, cache=True)
+@njit(parallel=False, cache=True)
 def hessenberg(A : np.ndarray , P : np.ndarray):
     """Transformation of A in upper Hessenberg form.
     This is done in-place to reduce memory usage.
@@ -20,7 +31,7 @@ def hessenberg(A : np.ndarray , P : np.ndarray):
     """
 
 # Transformation QR
-@numba.jit(nopython=True, parallel=False, cache=True)
+@njit(parallel=False, cache=True)
 def step_QR(H : np.ndarray ,U : np.ndarray ,m : int) -> int:
     """A unitary transformation Q is applied on the left and the right of H which transforms H into RQ for which QR is the QR-factorization of H.
     This is done in-place to reduce memory usage.
@@ -36,7 +47,7 @@ def step_QR(H : np.ndarray ,U : np.ndarray ,m : int) -> int:
     return m_new
 
 # Transformation QR with shifts
-@numba.jit(nopython=True, parallel=False, cache=True)
+@njit(parallel=False, cache=True)
 def step_qr_shift(H : np.ndarray, U : np.ndarray , m : int):
     """Introducing the Wilksinson shift σ, we compute the QR factorization of H - σI instead of H.
     This is done in-place to reduce memory usage.
@@ -48,7 +59,7 @@ def step_qr_shift(H : np.ndarray, U : np.ndarray , m : int):
     """
 
 # Algorithme QR
-@numba.jit(nopython=True, parallel=False, cache=True)
+@njit(parallel=False, cache=True)
 def solve_qr(A : np.ndarray, use_shifts : bool , eps : float , max_iter : int) -> tuple[np.ndarray, int]:
     """Computes the QR factorization such that A = U* T U.
     This is done in-place to reduce memory usage.
