@@ -45,7 +45,18 @@ def mprod(m1 : np.ndarray, m2 : np.ndarray) -> np.ndarray:
 
     return m3
 
+@njit(parallel=True, cache=True)
+def vnorm(v : np.ndarray):
+    if v.ndim != 1:
+        raise ValueError(f"{v} is not a vector")
     
+    sum : np.float64 = 0
+    n = v.shape[0]
+
+    for i in prange(n):
+        sum += v[i]*v[i]
+
+    return np.sqrt(sum)
 
 ## Main Functions
 # Transformation sous forme Hessenberg
