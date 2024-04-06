@@ -58,7 +58,7 @@ def vnorm(v : np.ndarray):
 
 ## Main Functions
 # Transformation sous forme Hessenberg
-@njit(parallel=False, cache=True)
+@njit(parallel=True, cache=True)
 def hessenberg(A : np.ndarray , P : np.ndarray):
     """Transformation of A in upper Hessenberg form.
     This is done in-place to reduce memory usage.
@@ -67,6 +67,8 @@ def hessenberg(A : np.ndarray , P : np.ndarray):
         A (np.ndarray (with np.complex_ entries)): Contains n x n matrix A
         P (np.ndarray (with np.complex_ entries)): Un-initialised array which contains n x n unitary transformation matrix P
     """
+
+    
 
 # Transformation QR
 @njit(parallel=False, cache=True)
