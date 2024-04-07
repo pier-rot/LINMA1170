@@ -110,6 +110,25 @@ def hhvec(x : np.ndarray) -> np.ndarray:
 
     return vk
 
+
+# Givens
+@njit(cache=True)
+def givens(a : c_type, b : c_type):
+    if (b== 0):
+        c = 1
+        s = 0
+    else:
+        if (np.abs(b) > np.abs(a)):
+            r = -a/b
+            s = 1/np.sqrt(1+r*r)
+            c = r*s
+        else:
+            r = -b/a
+            c = 1/np.sqrt(1+r*r)
+            s = r*c
+
+    return c,s
+
 ## Main Functions
 # Transformation sous forme Hessenberg
 @njit(parallel=True, cache=True)
