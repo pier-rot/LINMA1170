@@ -129,6 +129,8 @@ def givens(a : c_type, b : c_type):
 
     return c,s
 
+
+
 ## Main Functions
 # Transformation sous forme Hessenberg
 @njit(parallel=True, cache=True)
@@ -169,6 +171,18 @@ def step_QR(H : np.ndarray ,U : np.ndarray ,m : int) -> int:
         m_new (int) : New dimension of active matrix after an eigenvalue is found
     """
     m_new = 0
+    n = H.shape[0]
+    Gs = np.zeros((n-1, 2,2),dtype=c_type)
+
+    for k in range(n-1):
+        c,s = givens(H[k,k], H[k+1,k])
+        Gs[k] = np.array([[c , -s],[s,c]],dtype=c_type)
+        H[k:k+2, k:] = dot(Gs[k], H[k:k+2, k:])
+    
+    for k in range(n-1):
+        H[:k+2, k:k+2] = dot(H[:k+2, k:k+2], Gs[k])
+
+
     return m_new
 
 # Transformation QR with shifts
