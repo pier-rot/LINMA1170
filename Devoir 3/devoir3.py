@@ -1,6 +1,5 @@
 from numba import njit, prange
 import numpy as np
-import matplotlib.pyplot as plt
 
 ## Constants
 c_type = np.complex128
@@ -223,8 +222,8 @@ if __name__ == "__main__":
     A = np.random.randn(m,m).astype(c_type)
     Acopy = A.copy()
     hessenberg(A, np.eye(m,m).astype(c_type))
-    fig,axs = plt.subplots(1,2)
-    axs[0].imshow(np.abs(A), cmap='Blues')
-    axs[1].imshow(np.abs(Acopy), cmap="Blues")
-
-    plt.show()
+    #fig,axs = plt.subplots(1,2)
+    #axs[0].imshow(np.abs(A), cmap='Blues')
+    #axs[1].imshow(np.abs(Acopy), cmap="Blues")
+#
+    #plt.show()
