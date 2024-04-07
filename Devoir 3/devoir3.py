@@ -1,11 +1,18 @@
 from numba import njit, prange
 import numpy as np
+import matplotlib.pyplot as plt
 
 ## Constants
-c_type = np.complex64
+c_type = np.complex128
 
 ## Helper functions
-# Global dot product
+# Outer product
+@njit(parallel=False, cache=True)
+def outer(v1 : np.ndarray, v2 : np.ndarray):
+    return np.outer(v1,v2)
+
+
+# General dot product
 @njit(cache=True)
 def dot(A : np.ndarray, B : np.ndarray) -> np.ndarray:
     if (A.ndim == 1) and (B.ndim == 1) and (A.size == B.size):
@@ -65,7 +72,8 @@ def VM_prod(m1 : np.ndarray, m2 : np.ndarray) -> np.ndarray:
     a = np.zeros((1,m1.size), dtype=c_type)
     a[0] = m1
     return MM_prod(a,m2)
-    
+
+
 # Matrix * Vector product
 @njit(parallel=True, cache=True)
 def MV_prod(m1 : np.ndarray, m2 : np.ndarray) -> np.ndarray:
@@ -76,6 +84,7 @@ def MV_prod(m1 : np.ndarray, m2 : np.ndarray) -> np.ndarray:
     for i in prange(m2.size):
         a[i] = np.array([m2[i]],dtype=c_type)
     return MM_prod(m1,a)
+
 
 # Vector norm
 @njit(parallel=True, cache=True)
@@ -91,6 +100,8 @@ def vnorm(v : np.ndarray):
 
     return np.sqrt(sum)
 
+
+
 ## Main Functions
 # Transformation sous forme Hessenberg
 @njit(parallel=True, cache=True)
@@ -102,6 +113,21 @@ def hessenberg(A : np.ndarray , P : np.ndarray):
         A (np.ndarray (with np.complex_ entries)): Contains n x n matrix A
         P (np.ndarray (with np.complex_ entries)): Un-initialised array which contains n x n unitary transformation matrix P
     """
+    #A = A.astype(c_type)
+    #P = P.astype(c_type)
+    m = A.shape[0]
+
+    I = np.eye(m,m, dtype=c_type)
+    for k in range(m-2):
+        x = A[k+1:,k]
+        e1 = np.zeros_like(x,dtype=c_type)
+        e1[0] = 1
+        vk = np.sign(x[0])*vnorm(x)*e1 + x
+        vk = vk/vnorm(vk)
+        Pk = I[k+1:, k+1:] - 2*outer(vk, np.conjugate(vk))
+        P[k+1:, k+1:] = dot(P[k+1:, k+1:], Pk)
+        A[k+1:,k:] = dot(Pk, A[k+1:, k:])
+        A[:,k+1:] = dot(A[:,k+1:], Pk)
 
 
 
@@ -153,3 +179,14 @@ def solve_qr(A : np.ndarray, use_shifts : bool , eps : float , max_iter : int) -
     k = 0
 
     return U,k
+
+if __name__ == "__main__":
+    m = 10
+    A = np.random.randn(m,m).astype(c_type)
+    Acopy = A.copy()
+    hessenberg(A, np.eye(m,m).astype(c_type))
+    fig,axs = plt.subplots(1,2)
+    axs[0].imshow(np.abs(A), cmap='Blues')
+    axs[1].imshow(np.abs(Acopy), cmap="Blues")
+
+    plt.show()
