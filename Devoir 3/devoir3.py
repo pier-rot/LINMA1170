@@ -100,7 +100,15 @@ def vnorm(v : np.ndarray):
 
     return np.sqrt(sum)
 
+# Householder vector
+@njit(cache=True)
+def hhvec(x : np.ndarray) -> np.ndarray:
+    e1 = np.zeros_like(x, dtype=c_type)
+    e1[0] = 1
+    vk = np.sign(x[0])*vnorm(x)*e1 + x
+    vk = vk/vnorm(vk)
 
+    return vk
 
 ## Main Functions
 # Transformation sous forme Hessenberg
@@ -120,10 +128,7 @@ def hessenberg(A : np.ndarray , P : np.ndarray):
     I = np.eye(m,m, dtype=c_type)
     for k in range(m-2):
         x = A[k+1:,k]
-        e1 = np.zeros_like(x,dtype=c_type)
-        e1[0] = 1
-        vk = np.sign(x[0])*vnorm(x)*e1 + x
-        vk = vk/vnorm(vk)
+        vk = hhvec(x)
         Pk = I[k+1:, k+1:] - 2*outer(vk, np.conjugate(vk))
         P[k+1:, k+1:] = dot(P[k+1:, k+1:], Pk)
         A[k+1:,k:] = dot(Pk, A[k+1:, k:])
